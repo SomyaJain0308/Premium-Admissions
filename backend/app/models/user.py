@@ -1,25 +1,38 @@
-from sqlalchemy import String
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.types import Uuid
 
-from app.models.base import Base, UUIDMixin, TimestampMixin
+from app.models.base import Base, TimestampMixin
 
 
-class User(UUIDMixin, TimestampMixin, Base):
+class User(TimestampMixin, Base):
     __tablename__ = "users"
 
-    email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        nullable=False,
-        index=True,
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey(
+            "auth.users.id",
+            ondelete="CASCADE",
+            name="fk_users_auth_user_id",
+        ),
+        primary_key=True,
     )
 
-    hashed_password: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
+    display_name: Mapped[str | None] = mapped_column(
+        String(160),
+        nullable=True,
     )
 
-    is_active: Mapped[bool] = mapped_column(
-        default=True,
+    avatar_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    preferred_locale: Mapped[str] = mapped_column(
+        String(20),
+        default="en-IN",
+        server_default="en-IN",
         nullable=False,
     )

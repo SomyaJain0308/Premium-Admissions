@@ -26,6 +26,16 @@ config.set_main_option(
 target_metadata = Base.metadata
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    if (
+        type_ == "table"
+        and getattr(object, "schema", None) == "auth"
+    ):
+        return False
+
+    return True
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
 
@@ -35,6 +45,8 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
+        include_object=include_object,
+        compare_server_default=True
     )
 
     with context.begin_transaction():
@@ -46,6 +58,8 @@ def do_run_migrations(connection):
         connection=connection,
         target_metadata=target_metadata,
         compare_type=True,
+        compare_server_default=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
