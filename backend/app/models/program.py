@@ -9,9 +9,10 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
+from app.models.university import University
 
 
 class Program(UUIDMixin, TimestampMixin, Base):
@@ -98,4 +99,8 @@ class Program(UUIDMixin, TimestampMixin, Base):
         default="active",
         server_default="active",
         nullable=False,
+    )
+
+    university: Mapped["University"] = relationship(
+        back_populates="programs",
     )

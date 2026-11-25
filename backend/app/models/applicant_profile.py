@@ -5,7 +5,7 @@ from sqlalchemy import CheckConstraint, Date, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-
+from app.models.user import User
 
 class ApplicantProfile(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "applicant_profiles"
@@ -53,4 +53,8 @@ class ApplicantProfile(UUIDMixin, TimestampMixin, Base):
         default="draft",
         server_default="draft",
         nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="applicant_profile",
     )

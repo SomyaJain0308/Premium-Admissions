@@ -9,10 +9,11 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-
+from app.models.university import University    
+from app.models.user import User
 
 class UniversityMembership(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "university_memberships"
@@ -80,4 +81,12 @@ class UniversityMembership(UUIDMixin, TimestampMixin, Base):
     accepted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+    )
+
+    user: Mapped["User"] = relationship(
+        back_populates="memberships",
+    )
+
+    university: Mapped["University"] = relationship(
+        back_populates="memberships",
     )

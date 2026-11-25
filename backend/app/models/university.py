@@ -1,8 +1,9 @@
 from sqlalchemy import CheckConstraint, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-
+from app.models.program import Program
+from app.models.university_membership import UniversityMembership
 
 class University(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "universities"
@@ -61,4 +62,13 @@ class University(UUIDMixin, TimestampMixin, Base):
         default="draft",
         server_default="draft",
         nullable=False,
+    )
+
+    programs: Mapped[list["Program"]] = relationship(
+        back_populates="university",
+        cascade="all, delete-orphan",
+    )
+
+    memberships: Mapped[list["UniversityMembership"]] = relationship(
+        back_populates="university",
     )

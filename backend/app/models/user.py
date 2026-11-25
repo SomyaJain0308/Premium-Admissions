@@ -1,11 +1,12 @@
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
 from app.models.base import Base, TimestampMixin
-
+from app.models.university_membership import UniversityMembership
+from app.models.applicant_profile import ApplicantProfile
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
@@ -35,4 +36,13 @@ class User(TimestampMixin, Base):
         default="en-IN",
         server_default="en-IN",
         nullable=False,
+    )
+
+    applicant_profile: Mapped["ApplicantProfile | None"] = relationship(
+        back_populates="user",
+        uselist=False,
+    )
+
+    memberships: Mapped[list["UniversityMembership"]] = relationship(
+        back_populates="user",
     )
