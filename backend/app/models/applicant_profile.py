@@ -2,10 +2,9 @@ from datetime import date
 from uuid import UUID
 
 from sqlalchemy import CheckConstraint, Date, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-from app.models.user import User
 
 class ApplicantProfile(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "applicant_profiles"

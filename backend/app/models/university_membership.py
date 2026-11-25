@@ -12,8 +12,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-from app.models.university import University    
-from app.models.user import User
 
 class UniversityMembership(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "university_memberships"
@@ -85,6 +83,7 @@ class UniversityMembership(UUIDMixin, TimestampMixin, Base):
 
     user: Mapped["User"] = relationship(
         back_populates="memberships",
+        foreign_keys=[user_id],
     )
 
     university: Mapped["University"] = relationship(

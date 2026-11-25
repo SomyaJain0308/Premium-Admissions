@@ -2,8 +2,6 @@ from sqlalchemy import CheckConstraint, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-from app.models.program import Program
-from app.models.university_membership import UniversityMembership
 
 class University(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "universities"

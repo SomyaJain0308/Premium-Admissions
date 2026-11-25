@@ -5,8 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
 from app.models.base import Base, TimestampMixin
-from app.models.university_membership import UniversityMembership
-from app.models.applicant_profile import ApplicantProfile
+
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
@@ -39,10 +38,17 @@ class User(TimestampMixin, Base):
     )
 
     applicant_profile: Mapped["ApplicantProfile | None"] = relationship(
+        "ApplicantProfile",
         back_populates="user",
         uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     memberships: Mapped[list["UniversityMembership"]] = relationship(
+        "UniversityMembership",
         back_populates="user",
+        foreign_keys="UniversityMembership.user_id",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )

@@ -12,7 +12,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, UUIDMixin, TimestampMixin
-from app.models.university import University
 
 
 class Program(UUIDMixin, TimestampMixin, Base):
