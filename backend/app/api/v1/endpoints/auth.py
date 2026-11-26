@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -19,16 +18,16 @@ async def get_me(
     user_id: UUID = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
-    
-    await db.execute(
-        insert(User)
-        .values(id=user_id)
-        .on_conflict_do_nothing(index_elements=[User.id])
-    )
-    await db.commit()
-
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
 
-    return result.scalar_one()
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Application user profile not provisioned",
+        )
+
+    return user
