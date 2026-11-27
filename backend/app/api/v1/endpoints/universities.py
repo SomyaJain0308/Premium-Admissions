@@ -17,6 +17,11 @@ from app.models.department import Department
 from app.schemas.department import DepartmentCreate, DepartmentResponse
 from app.models.program import Program
 from app.schemas.program import ProgramCreate, ProgramResponse
+from app.models.admission_cycle import AdmissionCycle
+from app.schemas.admission_cycle import (
+    AdmissionCycleCreate,
+    AdmissionCycleResponse,
+)
 
 router = APIRouter(prefix="/universities", tags=["Universities"])
 
@@ -242,6 +247,55 @@ async def get_programs(
         select(Program)
         .where(Program.university_id == university_id)
         .order_by(Program.name.asc())
+    )
+
+    return result.scalars().all()
+
+
+@router.post(
+    "/{university_id}/admission-cycles",
+    response_model=AdmissionCycleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_admission_cycle(
+    university_id: UUID,
+    cycle_data: AdmissionCycleCreate,
+    membership=Depends(require_university_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    cycle = AdmissionCycle(
+        university_id=university_id,
+        **cycle_data.model_dump(),
+    )
+
+    db.add(cycle)
+
+    try:
+        await db.commit()
+        await db.refresh(cycle)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Admission cycle name or dates conflict with existing constraints",
+        )
+
+    return cycle
+
+
+@router.get(
+    "/{university_id}/admission-cycles",
+    response_model=list[AdmissionCycleResponse],
+)
+async def get_admission_cycles(
+    university_id: UUID,
+    membership=Depends(require_university_member),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(AdmissionCycle)
+        .where(AdmissionCycle.university_id == university_id)
+        .order_by(AdmissionCycle.academic_year_start.desc())
     )
 
     return result.scalars().all()
