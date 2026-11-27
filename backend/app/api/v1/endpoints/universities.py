@@ -22,6 +22,11 @@ from app.schemas.admission_cycle import (
     AdmissionCycleCreate,
     AdmissionCycleResponse,
 )
+from app.models.program_intake import ProgramIntake
+from app.schemas.program_intake import (
+    ProgramIntakeCreate,
+    ProgramIntakeResponse,
+)
 
 router = APIRouter(prefix="/universities", tags=["Universities"])
 
@@ -296,6 +301,55 @@ async def get_admission_cycles(
         select(AdmissionCycle)
         .where(AdmissionCycle.university_id == university_id)
         .order_by(AdmissionCycle.academic_year_start.desc())
+    )
+
+    return result.scalars().all()
+
+
+@router.post(
+    "/{university_id}/program-intakes",
+    response_model=ProgramIntakeResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_program_intake(
+    university_id: UUID,
+    intake_data: ProgramIntakeCreate,
+    membership=Depends(require_university_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    intake = ProgramIntake(
+        university_id=university_id,
+        **intake_data.model_dump(),
+    )
+
+    db.add(intake)
+
+    try:
+        await db.commit()
+        await db.refresh(intake)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invalid program, admission cycle, or duplicate intake",
+        )
+
+    return intake
+
+
+@router.get(
+    "/{university_id}/program-intakes",
+    response_model=list[ProgramIntakeResponse],
+)
+async def get_program_intakes(
+    university_id: UUID,
+    membership=Depends(require_university_member),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(ProgramIntake)
+        .where(ProgramIntake.university_id == university_id)
+        .order_by(ProgramIntake.created_at.desc())
     )
 
     return result.scalars().all()
